@@ -9,8 +9,10 @@ from NotesApp.serializers import NoteSerializers
 import json
 from NotesApp import function1
 
+
 @csrf_exempt
 def noteApi(request,id=0):
+    
     if request.method == 'GET':
         notes = Notes.objects.all()
         note_serializer = NoteSerializers(notes,many=True)

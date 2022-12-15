@@ -1,8 +1,16 @@
 from datetime import datetime 
 from googletrans import Translator
 import json
+import os
+import sendgrid
+from sendgrid.helpers.mail import *
+
+p=os.path.dirname(__file__)+"\..\..\data.json"
+f=open(p,"r")
+data_env = json.load(f)
 
 translator1=Translator()
+
 def cmp(x, y):
     if x == y:
         return 0
@@ -43,3 +51,14 @@ def note_validation(title,content):
     return data
 
     
+def send_email(f_email,t_email,subject,cont,):
+    sg = sendgrid.SendGridAPIClient(api_key=data_env['sendgrid_key'])
+    from_email = Email(f_email)
+    to_email = To(t_email)
+    content = Content("text/plain", cont)
+    mail = Mail(from_email, to_email, subject, content)
+    response = sg.client.mail.send.post(request_body=mail.get())
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+    return response.status_code
