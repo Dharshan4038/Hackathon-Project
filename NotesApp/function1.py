@@ -84,9 +84,10 @@ def search_note(title):
     for i in data: #get responce as list of dict
         if i['NoteTitle'].find(t_title) != -1:
             data1.append(i)
-    for i in data: #get responce as list of dict
+    for n,i in enumerate(data): #get responce as list of dict
         if i['NoteContent'].find(t_title) != -1:
-            data1.append(i)
+            if data1[n]['NoteId'] != i['NoteId']:
+                data1.append(i)
     return data1
 
 
