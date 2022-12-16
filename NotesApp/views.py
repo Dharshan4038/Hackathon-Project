@@ -16,6 +16,12 @@ def noteApi(request,id=0):
     if request.method == 'GET':
         notes = Notes.objects.all()
         note_serializer = NoteSerializers(notes,many=True)
+        if request.GET.get('search'):
+            search = request.GET.get('search')
+            s_search=function1.search_note(search)
+            note_serializer = NoteSerializers(s_search,many=True)
+            return JsonResponse(note_serializer.data,safe=False)
+            
         return JsonResponse(note_serializer.data,safe=False)
 
     elif request.method == 'POST':

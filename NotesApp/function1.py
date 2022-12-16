@@ -4,6 +4,10 @@ import json
 import os
 import sendgrid
 from sendgrid.helpers.mail import *
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+import requests
+import json
 
 p=os.path.dirname(__file__)+"\..\..\data.json"
 f=open(p,"r")
@@ -18,6 +22,7 @@ def cmp(x, y):
         return 1
     return -1
 
+#translate english to tamil
 def translate_to_tamil(sentence,title=False):
     tamil_txt = translator1.translate(sentence,src='en',dest='ta')
     if(title):
@@ -37,7 +42,10 @@ def title_dection(title):
             new_word.append(i)
         else:
             continue
-    return " ".join(new_word)
+    txt=" ".join(new_word)
+    if txt=="":
+        txt="தலைப்பு"
+    return txt
 
 
 def note_validation(title,content):
@@ -51,14 +59,37 @@ def note_validation(title,content):
     return data
 
     
-def send_email(f_email,t_email,subject,cont,):
-    sg = sendgrid.SendGridAPIClient(api_key=data_env['sendgrid_key'])
-    from_email = Email(f_email)
-    to_email = To(t_email)
-    content = Content("text/plain", cont)
-    mail = Mail(from_email, to_email, subject, content)
-    response = sg.client.mail.send.post(request_body=mail.get())
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
+def send_email(t_email,sub,cont):
+    message = Mail(
+    from_email='webapp.tamilnotes@gmail.com',
+    to_emails=t_email,
+    subject=sub,
+    html_content='<strong>'+cont+'</strong>')
+    try:
+        sg = SendGridAPIClient(data_env['sendgrid_key'])
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e)
+
     return response.status_code
+
+def search_note(title):    
+    response_API = requests.get('http://127.0.0.1:8000/note/')
+    data=response_API.json()
+    t_title=translate_to_tamil(title)
+    data1=[]
+    for i in data: #get responce as list of dict
+        if i['NoteTitle'].find(t_title) != -1:
+            data1.append(i)
+    for i in data: #get responce as list of dict
+        if i['NoteContent'].find(t_title) != -1:
+            data1.append(i)
+    return data1
+
+
+# def app(data,list1):
+#     for i in list1
+#     if(data['NoteId']==list1[i]['NoteId'])
